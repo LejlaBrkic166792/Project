@@ -1,3 +1,4 @@
 
 /.venv
 /instance
+/flaskr/__pycache__/*.pyc
