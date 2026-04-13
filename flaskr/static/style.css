@@ -20,21 +20,4 @@
     border: none;
     padding: 0.75rem;
     font-weight: 600;
-    transition: 0.3s;
-}
-
-.btn-custom:hover {
-    background-color: #FF6347;
-    color: white;
-    transform: translateY(-2px); /* Effetto elevazione */
-}
-
-/* Link colorati in tema */
-.main-box a {
-    color: #FF7F50;
-    text-decoration: none;
-}
-
-.main-box a:hover {
-    text-decoration: underline;
 }
