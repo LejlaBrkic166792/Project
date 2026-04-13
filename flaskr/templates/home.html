@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1>Benvenuto nel portale valutazioni</h1>
+    <p>Strumento per l'analisi dei report annuali degli studenti.</p>
+    <a href="{{ url_for('auth.login') }}">Accedi</a>
+    <a href="{{ url_for('auth.register') }}">Registrati</a>
+</div>
+{% endblock %}

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrazione{% endblock %}
+
+{% block body %}
+<div class="auth-form">
+    <h1>Crea Account Docente</h1>
+    <form method="POST">
+        <div>
+            <label for="username">Scegli Username</label>
+            <input type="text" name="username" id="username" required>
+        </div>
+        <div>
+            <label for="password">Scegli Password</label>
+            <input type="password" name="password" id="password" required>
+        </div>
+        <button type="submit">Registrati</button>
+    </form>
+    <p>Sei già registrato? <a href="{{ url_for('auth.login') }}">Accedi</a></p>
+</div>
+{% endblock %}

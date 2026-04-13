@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block body %}
+<div class="content">
+    <h1>Area Personale: Prof. {{ current_user.username }}</h1>
+    <p>Benvenuto nel tuo pannello di controllo.</p>
+    
+    <div class="menu">
+        <h3>Gestione Report</h3>
+        <ul>
+            <li><a href="#">Carica nuovi dati (CSV/Excel)</a></li>
+            <li><a href="#">Analisi anni precedenti</a></li>
+            <li><a href="{{ url_for('auth.logout') }}">Esci</a></li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

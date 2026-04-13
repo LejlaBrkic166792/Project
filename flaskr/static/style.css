@@ -1,0 +1,40 @@
+/* Colore Pesca per lo sfondo del body */
+.bg-peach {
+    background-color: #FFDAB9 !important; /* PeachPuff */
+}
+
+/* La box centrale bianca */
+.main-box {
+    background-color: white;
+    padding: 2.5rem;
+    border-radius: 1.25rem;
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+}
+
+/* Personalizzazione bottoni per richiamare il tema pesca */
+.btn-custom {
+    background-color: #FF7F50; /* Corallo */
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-custom:hover {
+    background-color: #FF6347;
+    color: white;
+    transform: translateY(-2px); /* Effetto elevazione */
+}
+
+/* Link colorati in tema */
+.main-box a {
+    color: #FF7F50;
+    text-decoration: none;
+}
+
+.main-box a:hover {
+    text-decoration: underline;
+}
