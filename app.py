@@ -10,7 +10,7 @@ if not os.path.exists('instance'):
     os.makedirs('instance')
 
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///dbms.db'
-#app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 # Data class - le righe del db
