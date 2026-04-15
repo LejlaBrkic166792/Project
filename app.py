@@ -17,6 +17,7 @@ from flask_scss import Scss
 if not os.path.exists('instance'):
     os.makedirs('instance')
 
+app.config["SECRET_KEY"]='sdvnksdv85uhvi48390vqSRtt5wseTU&549wwe'
 app.config["SQLALCHEMY_DATABASE_URI"] = 'sqlite:///dbms.db'
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
