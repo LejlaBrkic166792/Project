@@ -5,6 +5,14 @@ import os
 
 app = Flask(__name__)
 
+try:
+    from flask import Markup
+except ImportError:
+    from markupsafe import Markup
+
+# Solo dopo metti l'import di Scss
+from flask_scss import Scss
+
 # Assicuriamoci che la cartella 'instance' esista per il database
 if not os.path.exists('instance'):
     os.makedirs('instance')
