@@ -24,6 +24,9 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/lejla/Project/database.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+    # VERIFICA DI SICUREZZA (stampa nel log se l'URI esiste davvero)
+    print(f"DEBUG: URI impostato a -> {app.config.get('SQLALCHEMY_DATABASE_URI')}")
+
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)
 
