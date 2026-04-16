@@ -17,15 +17,12 @@ load_dotenv(os.path.join(basedir, '..', '.env'))
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     
-    raise Exception("IL SERVER STA LEGGENDO QUESTO FILE!")
-
     #Configurazione (evita di mettere la chiave segrta)
-    app.config['SECRET_KEY'] = 'dev'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/lejla/Project/database.db'
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-    # VERIFICA DI SICUREZZA (stampa nel log se l'URI esiste davvero)
-    print(f"DEBUG: URI impostato a -> {app.config.get('SQLALCHEMY_DATABASE_URI')}")
+    app.config.update(
+        SECRET_KEY=os.getenv('SECRET_KEY'),
+        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'), #vedi poi di cambiare da sqlite a mysql o postgres
+        SQLALCHEMY_TRACK_MODIFICATIONS=False
+    )
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)
@@ -45,12 +42,8 @@ def create_app():
     app.register_blueprint(main_bp)
 
     # Questo blocco assicura che le tabelle vengano create se non esistono
-    #from .models import User # Importante importare i modelli qui!
-    #with app.app_context():
-    #    db.create_all()
-    
+    from .models import User # Importante importare i modelli qui!
     with app.app_context():
-        from .models import User # Importante importare i modelli qui
         db.create_all()
 
     return app
