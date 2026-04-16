@@ -17,6 +17,8 @@ load_dotenv(os.path.join(basedir, '..', '.env'))
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
     
+    raise Exception("IL SERVER STA LEGGENDO QUESTO FILE!")
+
     #Configurazione (evita di mettere la chiave segrta)
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY'),
