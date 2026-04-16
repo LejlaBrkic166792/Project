@@ -20,11 +20,9 @@ def create_app():
     raise Exception("IL SERVER STA LEGGENDO QUESTO FILE!")
 
     #Configurazione (evita di mettere la chiave segrta)
-    app.config.update(
-        SECRET_KEY=os.getenv('SECRET_KEY'),
-        SQLALCHEMY_DATABASE_URI='sqlite:////home/lejla/Project/database.db',
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
-    )
+    app.config['SECRET_KEY'] = 'dev'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////home/lejla/Project/database.db'
+    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)
