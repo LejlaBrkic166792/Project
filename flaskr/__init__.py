@@ -20,8 +20,8 @@ def create_app():
     #Configurazione (evita di mettere la chiave segrta)
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY'),
-        #SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'), #vedi poi di cambiare da sqlite a mysql o postgres
-        SQLALCHEMY_DATABASE_URI = 'sqlite:////home/lejla/Project/database.db'
+        # AGGIUNTA LA VIRGOLA ALLA FINE DELLA RIGA SUCCESSIVA
+        SQLALCHEMY_DATABASE_URI='sqlite:////home/lejla/Project/database.db',
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 
@@ -43,8 +43,12 @@ def create_app():
     app.register_blueprint(main_bp)
 
     # Questo blocco assicura che le tabelle vengano create se non esistono
-    from .models import User # Importante importare i modelli qui!
+    #from .models import User # Importante importare i modelli qui!
+    #with app.app_context():
+    #    db.create_all()
+    
     with app.app_context():
+        from .models import User # Importante importare i modelli qui
         db.create_all()
 
     return app
