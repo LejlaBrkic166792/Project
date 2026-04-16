@@ -20,7 +20,8 @@ def create_app():
     #Configurazione (evita di mettere la chiave segrta)
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY'),
-        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'), #vedi poi di cambiare da sqlite a mysql o postgres
+        #SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'), #vedi poi di cambiare da sqlite a mysql o postgres
+        SQLALCHEMY_DATABASE_URI = 'mysql+mysqlconnector://lejla:bearBirde90*@lejla.mysql.pythonanywhere-services.com/lejla$NOME_DB'
         SQLALCHEMY_TRACK_MODIFICATIONS=False
     )
 
