@@ -6,7 +6,7 @@ import os
 from dotenv import load_dotenv
 from flask import Flask
 from .db import db, login_manager, bcrypt
-
+from config import DevelopmentConfig, ProductionConfig # Importa le tue classi
 
 
 # Trova la cartella 'flaskr'
@@ -18,11 +18,11 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     
     #Configurazione (evita di mettere la chiave segrta)
-    app.config.update(
-        SECRET_KEY=os.getenv('SECRET_KEY'),
-        SQLALCHEMY_DATABASE_URI=os.getenv('DATABASE_URL'), #vedi poi di cambiare da sqlite a mysql o postgres
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
-    )
+    # 1. Carichiamo la configurazione
+    if os.environ.get('ENV') == 'production':
+        app.config.from_object(ProductionConfig)
+    else:
+        app.config.from_object(DevelopmentConfig)
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)
