@@ -21,8 +21,8 @@ def create_app():
     app.config.update(
         SECRET_KEY=os.getenv('SECRET_KEY'),
         # AGGIUNTA LA VIRGOLA ALLA FINE DELLA RIGA SUCCESSIVA
-        SQLALCHEMY_DATABASE_URI='sqlite:////home/lejla/Project/database.db',
-        SQLALCHEMY_TRACK_MODIFICATIONS=False
+        SQLALCHEMY_DATABASE_URI = 'sqlite:////home/lejla/Project/database.db',
+        SQLALCHEMY_TRACK_MODIFICATIONS = False
     )
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
