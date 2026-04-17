@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from "forms.html" import render_input %}
 
 {% block title %}Login{% endblock %}
 
@@ -9,28 +10,13 @@
     <form method="POST">
         {{ form.hidden_tag() }} 
 
-        {# crea la sezione per inserire lo username #}
-        <div class="mb-3">
-            {{ form.username.label(class="form-label") }}
-            {{ form.username(class="form-control") }}
-            {% for error in form.username.errors %}
-                <span class="text-danger small">{{ error }}</span>
-            {% endfor %}
-        </div>
-
-        
-        {# crea la sezione per inserire la password #}
-        <div class="mb-3">
-            {{ form.password.label(class="form-label") }}
-            {{ form.password(class="form-control") }}
-            {% for error in form.password.errors %}
-                <span class="text-danger small">{{ error }}</span>
-            {% endfor %}
-        </div>
+        {# Usi la macro invece di scrivere tutto l'HTML ogni volta #}
+        {{ render_input(form.username) }}
+        {{ render_input(form.password) }}
 
         {{ form.submit(class="btn btn-primary w-100") }}
     </form>
-
+    
     <p class="mt-3">Non hai un account? <a href="{{ url_for('auth.register') }}">Registrati</a></p>
 </div>
 {% endblock %}
