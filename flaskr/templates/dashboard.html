@@ -3,10 +3,19 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block body %}
-<div class="content">
-    <p>Benvenuto nel tuo pannello di controllo.</p>
-    <input type="text">
-    <input type="submit">
-    
-</div>
+    <div class="border-bottom mb-4">
+        <h5>Benvenuto, <strong>{{ current_user.username if current_user else 'Utente' }}</strong></h5>
+    </div>
+
+    <div>
+        
+        <h4>Nessun dataset trovato</h4>
+        <p>Carica un file per iniziare l'analisi.</p>
+        
+        <form class="mt-4">
+            <input type="file" class="form-control mb-2">
+            <button type="submit" class="btn btn-primary">Carica Dataset</button>
+        </form>
+
+    </div>
 {% endblock %}

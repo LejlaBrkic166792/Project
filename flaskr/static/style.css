@@ -3,7 +3,22 @@
     background-color: #FFDAB9 !important; /* PeachPuff */
 }
 
-/* La box centrale bianca */
+.btn-custom:hover {
+    background-color: #FF6347; /* Un corallo leggermente più scuro */
+    color: white;
+}
+
+.form-control:focus {
+    border-color: #FF7F50;
+    box-shadow: 0 0 0 0.25rem rgba(255, 127, 80, 0.25);
+}
+
+.alert {
+    border-radius: 0.75rem;
+    border: none;
+    font-size: 0.9rem;
+}
+
 .main-box {
     background-color: white;
     padding: 2.5rem;
@@ -11,6 +26,22 @@
     width: 100%;
     max-width: 420px;
     text-align: center;
+    /* Animazione di entrata */
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+:root {
+    --peach-bg: #FFDAB9;
+    --corallo: #FF7F50;
+}
+
+body {
+    background-color: var(--peach-bg);
 }
 
 /* Personalizzazione bottoni per richiamare il tema pesca */

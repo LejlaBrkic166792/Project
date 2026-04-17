@@ -10,12 +10,11 @@
     <form method="POST">
         {{ form.hidden_tag() }} 
         
-        {# Pulito, veloce e privo di errori di battitura #}
         {{ render_input(form.username) }}
         {{ render_input(form.password) }}
 
         <div class="mt-4">
-            {{ form.submit(class="btn btn-primary w-100") }}
+            {{ form.submit(class="btn btn-custom w-100") }}
         </div>
     </form>
 
