@@ -12,6 +12,7 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 def register():
     form = RegisterForm()
     
+    #***********vedi se gestire qui le classi base on view, vedi come gestire i befor request e after request, teardown_request
     # validate_on_submit() controlla che la richiesta sia POST e che i dati siano validi
     if form.validate_on_submit():
         # Cripto la password
@@ -22,10 +23,10 @@ def register():
         db.session.commit()
         
         flash('Registrazione completata! Ora puoi accedere.', 'success')
-        return redirect(url_for('auth.login'))
+        return redirect(url_for('.login'))
 
     # Se GET o se la validazione fallisce, mostro il form (con gli errori inclusi)
-    return render_template('register.html', form=form)
+    return render_template('auth/register.html', form=form)
 
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
@@ -43,11 +44,11 @@ def login():
         
         flash('Username o password errati.', 'danger')
     
-    return render_template('login.html', form=form)
+    return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/logout')
 @login_required
 def logout():
     logout_user()
     flash('Ti sei disconnesso con successo.', 'info')
-    return redirect(url_for('auth.login'))
+    return redirect(url_for('.login'))

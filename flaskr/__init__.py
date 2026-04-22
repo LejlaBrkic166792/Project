@@ -4,7 +4,7 @@ impostare il database, registrare i Blueprint e caricare le chiavi segrete.
 '''
 import os
 from dotenv import load_dotenv
-from flask import Flask
+from flask import Flask, render_template
 from .db import db, login_manager, bcrypt
 from config import DevelopmentConfig, ProductionConfig # Importa le tue classi
 
@@ -18,7 +18,6 @@ def create_app():
     app = Flask(__name__, instance_relative_config=True)
     
     #Configurazione (evita di mettere la chiave segrta)
-    # 1. Carichiamo la configurazione
     if os.environ.get('ENV') == 'production':
         app.config.from_object(ProductionConfig)
     else:
@@ -36,8 +35,9 @@ def create_app():
 
     #Le viste e il codice non vengono registrati direttamente nell'applicazione, ma vengono prima registrati nel Blueprint.
     from .auth import auth_bp
-    app.register_blueprint(auth_bp)#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory. Puoi definire un url_prefix che verrà aggiunto a tutti gli indirizzi di quel Blueprint es. /login -> /auth/login
+    app.register_blueprint(auth_bp, url_prefix='/auth')#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory. Puoi definire un url_prefix che verrà aggiunto a tutti gli indirizzi di quel Blueprint es. /login -> /auth/login
 
+    #*********vedi sce gestire nel template main/dashboard, per rendere le cose piu visibili 
     from .main import main_bp
     app.register_blueprint(main_bp)
 
@@ -45,5 +45,15 @@ def create_app():
     from .models import User # Importante importare i modelli qui!
     with app.app_context():
         db.create_all()
+        
+    #GESTIONE ERORI provissorio 
+    def page_not_found(e):
+            return render_template('errors/404.html'), 404
+
+    def internal_server_error(e):
+        return render_template('errors/500.html'), 500
+
+    app.register_error_handler(404, page_not_found)
+    app.register_error_handler(500, internal_server_error)
 
     return app

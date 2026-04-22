@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from "forms.html" import render_input %}
+{% from "auth/forms.html" import render_input %}
 
 {% block title %}Login{% endblock %}
 
@@ -16,6 +16,7 @@
         {{ form.submit(class="btn btn-custom w-100") }}
     </form>
     
-    <p class="mt-3">Non hai un account? <a href="{{ url_for('auth.register') }}">Registrati</a></p>
+    <p class="mt-3">Non hai un account? <a href="{{ url_for('.register') }}">Registrati</a></p>
+    <p><a href="{{ url_for('main.home') }}">Torna alla Home</a></p>
 </div>
 {% endblock %}

@@ -7,8 +7,6 @@ db = SQLAlchemy()
 login_manager = LoginManager()
 bcrypt = Bcrypt()
 
-#bisogna gestire le sessioni e usare il fresh_login per le tratte sensibili (delete) cosi controlli da quanto tempo un user non fa login (in caso usi un remember cooky)
-
 @login_manager.user_loader
 #cookie memorizzano i dati come stringhe, int(user_id) assicura che SQLAlchemy cerchi l'ID nel formato corretto (numero intero).
 def load_user(user_id):
