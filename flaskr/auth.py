@@ -36,11 +36,15 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
 
+        #considerare se usare selecto a posto di query. ...
+        #stmt = select(User).where(User.username == form.username.data)
+        #user = db.session.execute(stmt).scalar_one_or_none()
+
         # Usa bcrypt per controllare la password
         if user and bcrypt.check_password_hash(user.password, form.password.data):
             login_user(user)
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.dashboard'))
+            return redirect(next_page or url_for('dashboard.dashboard'))
         
         flash('Username o password errati.', 'danger')
     

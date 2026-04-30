@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Le tue Materie</h3>
+        <a href="{{ url_for('dashboard.nuova_materia') }}" class="btn btn-success">
+            + Aggiungi Materia
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-danger">
+                Esci
+        </a>
+    </div>
+
+    <div class="row">
+        {# Ciclo sulle materie passate dalla funzione dashboard() #}
+        {% for s in subjects %}
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ s.name }}</h5>
+                    <p class="card-text text-muted">
+                        {{ s.datasets|length }} report caricati
+                    </p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('dashboard.report', subject_id=s.id) }}" class="btn btn-primary btn-sm">
+                            Apri Report
+                        </a>
+                        
+                        <form action="{{ url_for('dashboard.elimina_materia', subject_id=s.id) }}" method="POST" onsubmit="return confirm('Sei sicuro di voler eliminare questa materia e tutti i suoi dati?');">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                Elimina
+                            </a>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center mt-5">
+            <div class="p-5 border rounded bg-light">
+                <p class="text-muted">Benvenuto Prof! Non hai ancora creato nessuna materia.</p>
+                <a href="{{ url_for('dashboard.nuova_materia') }}" class="btn btn-success">
+                    Inizia ora: Aggiungi la tua prima Materia
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

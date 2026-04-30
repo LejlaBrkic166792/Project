@@ -6,8 +6,12 @@ import os
 from dotenv import load_dotenv
 from flask import Flask, render_template
 from .db import db, login_manager, bcrypt
-from config import DevelopmentConfig, ProductionConfig # Importa le tue classi
+from flask_talisman import Talisman
+from config import DevelopmentConfig # Importa le tue classi
+from flask_wtf.csrf import CSRFProtect
 
+#protegge richieste anche se non arrivano direttamente dal form
+csrf = CSRFProtect()
 
 # Trova la cartella 'flaskr'
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -16,19 +20,24 @@ load_dotenv(os.path.join(basedir, '..', '.env'))
 
 def create_app():
     app = Flask(__name__, instance_relative_config=True)
-    
-    #Configurazione (evita di mettere la chiave segrta)
-    if os.environ.get('ENV') == 'production':
-        app.config.from_object(ProductionConfig)
-    else:
-        app.config.from_object(DevelopmentConfig)
+    app.config.from_object(DevelopmentConfig)
+
+
+    ''' Configura Talisman (da vedre se mantenere, perche poi bisogna gestire i permessi boost)
+    csp = {
+        'default-src': '\'self\'',
+        'script-src': '\'self\'', 
+    }
+
+    # Talisman forza HTTPS di default (ma solo se è in prodaction) 
+    Talisman(app, content_security_policy=csp, force_https=not app.debug)'''
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)
-
     #dice a flask come r/w i cookie di sessione (controlla se ce un id utente nel cooki e se ce lo carica dal db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
+    csrf.init_app(app)
 
     # Se un utente prova ad accedere a una pagina protetta senza login, va automaticamente reindirizzato alla pagina di accesso.
     login_manager.login_view = 'auth.login' 
@@ -37,9 +46,9 @@ def create_app():
     from .auth import auth_bp
     app.register_blueprint(auth_bp, url_prefix='/auth')#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory. Puoi definire un url_prefix che verrà aggiunto a tutti gli indirizzi di quel Blueprint es. /login -> /auth/login
 
-    #*********vedi sce gestire nel template main/dashboard, per rendere le cose piu visibili 
-    from .main import main_bp
-    app.register_blueprint(main_bp)
+ 
+    from .dashboard import dash_bp
+    app.register_blueprint(dash_bp)
 
     # Questo blocco assicura che le tabelle vengano create se non esistono
     from .models import User # Importante importare i modelli qui!
