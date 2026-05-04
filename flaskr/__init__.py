@@ -23,14 +23,11 @@ def create_app():
     app.config.from_object(DevelopmentConfig)
 
 
-    ''' Configura Talisman (da vedre se mantenere, perche poi bisogna gestire i permessi boost)
-    csp = {
-        'default-src': '\'self\'',
-        'script-src': '\'self\'', 
-    }
-
-    # Talisman forza HTTPS di default (ma solo se è in prodaction) 
-    Talisman(app, content_security_policy=csp, force_https=not app.debug)'''
+    # Configurazione rapida: Talisman attivo solo in produzione
+    # Se app.debug è True, Talisman viene configurato per non rompere JS/CSS
+    Talisman(app, 
+             content_security_policy=None if app.debug else {'default-src': "'self'"},
+             force_https=not app.debug)
 
     #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
     db.init_app(app)

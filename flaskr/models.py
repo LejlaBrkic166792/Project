@@ -8,17 +8,21 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)  # Lunghezza maggiore per l'hash
 
-    subjects = db.relationship('Subject', backref='owner', lazy=True)
+    subjects = db.relationship('Subject', back_populates='owner', lazy=True, cascade="all, delete-orphan")
 
 
 class Subject(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False) 
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    datasets = db.relationship('Dataset', backref='subject', lazy=True, cascade="all, delete-orphan")
+
+    owner = db.relationship('User', back_populates='subjects')
+    datasets = db.relationship('Dataset', back_populates='subject', lazy=True, cascade="all, delete-orphan")
 
 class Dataset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
     data_json = db.Column(db.JSON, nullable=False)
+
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
+    subject = db.relationship('Subject', back_populates='datasets')
