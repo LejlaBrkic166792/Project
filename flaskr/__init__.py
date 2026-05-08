@@ -10,6 +10,8 @@ from flask_talisman import Talisman
 from config import DevelopmentConfig # Importa le tue classi
 from flask_wtf.csrf import CSRFProtect
 
+#valutare in futuro se e come usare i caching
+
 #protegge richieste anche se non arrivano direttamente dal form
 csrf = CSRFProtect()
 
@@ -39,18 +41,18 @@ def create_app():
     # Se un utente prova ad accedere a una pagina protetta senza login, va automaticamente reindirizzato alla pagina di accesso.
     login_manager.login_view = 'auth.login' 
 
-    #Le viste e il codice non vengono registrati direttamente nell'applicazione, ma vengono prima registrati nel Blueprint.
+    #Le viste vengono prima registrati nel Blueprint.
     from .auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory. Puoi definire un url_prefix che verrà aggiunto a tutti gli indirizzi di quel Blueprint es. /login -> /auth/login
+    app.register_blueprint(auth_bp, url_prefix='/auth')#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory
 
  
     from .dashboard import dash_bp
     app.register_blueprint(dash_bp)
 
-    # Questo blocco assicura che le tabelle vengano create se non esistono
-    from .models import User # Importante importare i modelli qui!
-    with app.app_context():
-        db.create_all()
+    # Creazione tabelle
+    with app.app_context(): #
+        from . import models  
+        db.create_all() #
         
     #GESTIONE ERORI provissorio 
     def page_not_found(e):

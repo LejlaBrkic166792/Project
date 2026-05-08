@@ -1,0 +1,54 @@
+
+
+.dash-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1rem;
+}
+
+.form-container {
+    max-width: 600px;
+    margin: 3rem auto;
+}
+
+.form-header {
+    background-color: #007bff;
+    color: white;
+    padding: 1rem;
+    border-radius: 0.5rem 0.5rem 0 0;
+}
+
+.form-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+
+.font-bold {
+    font-weight: bold;
+}
+
+.dash-header, .card-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.dash-container {
+    margin-top: 1.5rem; /* Sostituisce mt-4 */
+}
+
+.materia-card {
+    transition: transform 0.2s;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075); /* shadow-sm */
+}
+
+.materia-card:hover {
+    transform: translateY(-5px);
+}
+
+.text-info-muted {
+    color: #6c757d; /* text-muted */
+    font-size: 0.9rem;
+}

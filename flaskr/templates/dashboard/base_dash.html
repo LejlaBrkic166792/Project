@@ -5,22 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <title>{% block title %}Dashboard{% endblock %}</title>
 </head>
 <body class="bg-light">
-    <!-- Navbar Superiore per ordine e pulizia -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid">
-            <a class="navbar-brand font-weight-bold" href="{{ url_for('dashboard.dashboard') }}">Gestione Materie</a>
-            <div class="d-flex">
-                <span class="navbar-text me-3 text-white">Prof: {{ current_user.username }}</span>
-                <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Esci</a>
-            </div>
+    <nav class="navbar navbar-dark bg-primary shadow-sm">
+        <div class="container-fluid dash-nav"> <!-- Classe CSS personalizzata -->
+            <a class="navbar-brand font-bold" href="{{ url_for('dashboard.dashboard') }}">
+                Dashboard di {{ current_user.username }}
+            </a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Esci</a>
         </div>
     </nav>
 
     <div class="container-fluid mt-4">
-        <!-- Messaggi Flash posizionati in alto -->
         {% with messages = get_flashed_messages(with_categories=true) %}
           {% if messages %}
             {% for category, message in messages %}
@@ -32,7 +30,6 @@
           {% endif %}
         {% endwith %}
 
-        <!-- Il contenuto ora respira a tutta larghezza -->
         {% block body %}{% endblock %}
     </div>
 

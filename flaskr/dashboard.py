@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 #uso di select
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+import codecs
 
 # Importiamo il database e i modelli
 from .db import db
@@ -18,20 +19,21 @@ ALLOWED_EXTENSIONS = {'csv'}
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-'''
-valutare se ge
-'''
-
-
-@dash_bp.route('/') 
+@dash_bp.before_request
 @login_required
+def controllo_accessi():
+    # ogni rotta in questo file ora richiede il login automaticamente.
+    pass
+
+#mostra la lista delle materie dell'prof
+@dash_bp.route('/') 
 def dashboard():
     istruzione = select(Subject).where(Subject.user_id == current_user.id)
     materie = db.session.execute(istruzione).scalars().all()
     return render_template('dashboard/lista_materie.html', subjects=materie)
 
+#aggiunge una nuova materia
 @dash_bp.route('/nuova_materia', methods=['GET', 'POST'])
-@login_required
 def nuova_materia():
     if request.method == 'POST':
         nome_materia = request.form.get('subject_name')
@@ -42,11 +44,10 @@ def nuova_materia():
                 # 1. Crea la Materia
                 nuova_materia_obj = Subject(name=nome_materia, user_id=current_user.id)
                 db.session.add(nuova_materia_obj)
-                #aggiunge i dati senza chiudere la transizione 
                 db.session.flush() 
 
-                # 2. Leggi CSV
-                stream = io.StringIO(file.stream.read().decode("UTF8"), newline=None)
+                # 2. Leggi CSV, decodifichiamo lo stream riga per riga
+                stream = codecs.iterdecode(file.stream, 'utf-8')
                 reader = csv.DictReader(stream)
                 data_list = [row for row in reader]
 
@@ -69,25 +70,8 @@ def nuova_materia():
 
     return render_template('dashboard/nuova_materia.html')
 
-@dash_bp.route('/report/<int:subject_id>')
-@login_required
-def report(subject_id):
-    istruzione = (
-        select(Subject)
-        .options(selectinload(Subject.datasets))
-        .where(Subject.id == subject_id, Subject.user_id == current_user.id)
-    )
-    materia = db.session.execute(istruzione).scalar_one_or_none()
-    
-    if not materia:
-        flash("Materia non trovata o non autorizzato.", "danger")
-        return redirect(url_for('dashboard.dashboard'))
-    
-    return render_template('dashboard/report.html', subject=materia)
-
-
+#elimina la materia (provissorio)
 @dash_bp.route('/elimina_materia/<int:subject_id>', methods=['POST'])
-@login_required
 def elimina_materia(subject_id):
     # Cerchiamo la materia assicurandoci che appartenga all'utente loggato
     istruzione = select(Subject).where(Subject.id == subject_id, Subject.user_id == current_user.id)
@@ -108,3 +92,20 @@ def elimina_materia(subject_id):
         flash(f'Errore durante l\'eliminazione: {e}')
     
     return redirect(url_for('dashboard.dashboard'))
+
+
+#paggina dei report
+@dash_bp.route('/report/<int:subject_id>')
+def report(subject_id):
+    istruzione = (
+        select(Subject)
+        .options(selectinload(Subject.datasets))
+        .where(Subject.id == subject_id, Subject.user_id == current_user.id)
+    )
+    materia = db.session.execute(istruzione).scalar_one_or_none()
+    
+    if not materia:
+        flash("Materia non trovata o non autorizzato.", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+    
+    return render_template('dashboard/report.html', subject=materia)

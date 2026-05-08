@@ -2,6 +2,7 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from .models import User  # Serve per il controllo dello username esistente
+from sqlalchemy import select
 
 class RegisterForm(FlaskForm):
     # Definizione dei campi
@@ -19,14 +20,13 @@ class RegisterForm(FlaskForm):
     
     submit = SubmitField("Registrati")
 
-    # VALIDAZIONE PERSONALIZZATA:
-    # Flask-WTF cerca metodi che iniziano con 'validate_' + nome_campo
+    # In form.py
     def validate_username(self, username):
-        # Cerchiamo nel DB se lo username inserito dall'utente è già presente
-        existing_user = User.query.filter_by(username=username.data).first()
+        from .db import db # Import locale
+        stmt = select(User).where(User.username == username.data)
+        existing_user = db.session.execute(stmt).scalar_one_or_none()
         if existing_user:
-            # Se esiste, lanciamo un errore che verrà mostrato nel template HTML
-            raise ValidationError("Questo username è già occupato. Scegline un altro.")
+            raise ValidationError("Questo username è già occupato.")
 
 class LoginForm(FlaskForm):
     username = StringField(
