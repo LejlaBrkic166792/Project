@@ -1,0 +1,46 @@
+{% extends 'dashboard/base_dash.html' %}
+
+{% block title %}Dettagli Tabelle - {{ subject.name }}{% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1>Dati Analitici: {{ subject.name }}</h1>
+        <a href="{{ url_for('dashboard.report', subject_id=subject.id) }}" class="btn btn-secondary">
+            Torna ai Grafici
+        </a>
+    </div>
+
+    {% for ds in datasets %}
+    <div class="card shadow-sm mb-5 border-0">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">{{ ds.filename }}</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            {% for col in ds.data_json[0].keys() %}
+                                <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for riga in ds.data_json %}
+                        <tr>
+                            {% for col in ds.data_json[0].keys() %}
+                                <td class="{{ 'fw-bold' if loop.first else '' }}">
+                                    {{ riga[col] }}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

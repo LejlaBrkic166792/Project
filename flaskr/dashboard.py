@@ -1,16 +1,12 @@
-import csv
-import io
-from flask import Blueprint, render_template, request, flash, redirect, url_for
+from flask import Blueprint, render_template, request, flash, redirect, url_for, jsonify
 from flask_login import login_required, current_user
 from werkzeug.utils import secure_filename
-#uso di select
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-import codecs
 
-# Importiamo il database e i modelli
 from .db import db
 from .models import Subject, Dataset 
+from .stat_report import *
 
 dash_bp = Blueprint('dashboard', __name__)
 
@@ -22,14 +18,13 @@ def allowed_file(filename):
 @dash_bp.before_request
 @login_required
 def controllo_accessi():
-    # ogni rotta in questo file ora richiede il login automaticamente.
     pass
 
 #mostra la lista delle materie dell'prof
 @dash_bp.route('/') 
 def dashboard():
-    istruzione = select(Subject).where(Subject.user_id == current_user.id)
-    materie = db.session.execute(istruzione).scalars().all()
+    lista = select(Subject).where(Subject.user_id == current_user.id)
+    materie = db.session.execute(lista).scalars().all()
     return render_template('dashboard/lista_materie.html', subjects=materie)
 
 #aggiunge una nuova materia
@@ -37,27 +32,32 @@ def dashboard():
 def nuova_materia():
     if request.method == 'POST':
         nome_materia = request.form.get('subject_name')
-        file = request.files.get('file')
+        files = request.files.getlist('files')
 
-        if nome_materia and file and allowed_file(file.filename):
+        if files and files[0].filename != '':
             try:
-                # 1. Crea la Materia
+                if not nome_materia:
+                    nome_materia = estrai_valore(files[0], 'Attività Didattica (AD)')
+                   
+                    if not nome_materia:
+                        nome_materia = "Materia senza nome (estrazione fallita)"
+                
                 nuova_materia_obj = Subject(name=nome_materia, user_id=current_user.id)
                 db.session.add(nuova_materia_obj)
-                db.session.flush() 
+                db.session.flush()
+                
 
-                # 2. Leggi CSV, decodifichiamo lo stream riga per riga
-                stream = codecs.iterdecode(file.stream, 'utf-8')
-                reader = csv.DictReader(stream)
-                data_list = [row for row in reader]
+                for file in files:
+                    if file and file.filename != '' and allowed_file(file.filename):
+                        
+                        data_list = stat_csv(file)
 
-                # 3. Salva Dataset collegato alla materia
-                new_dataset = Dataset(
-                    filename=secure_filename(file.filename),
-                    data_json=data_list,
-                    subject_id=nuova_materia_obj.id
-                )
-                db.session.add(new_dataset)
+                        new_dataset = Dataset(
+                            filename=secure_filename(file.filename),
+                            data_json=data_list,
+                            subject_id=nuova_materia_obj.id
+                        )
+                        db.session.add(new_dataset)
                 db.session.commit()
                 
                 flash(f'Materia "{nome_materia}" creata con successo!', 'success')
@@ -70,10 +70,9 @@ def nuova_materia():
 
     return render_template('dashboard/nuova_materia.html')
 
-#elimina la materia (provissorio)
+#elimina la materia
 @dash_bp.route('/elimina_materia/<int:subject_id>', methods=['POST'])
 def elimina_materia(subject_id):
-    # Cerchiamo la materia assicurandoci che appartenga all'utente loggato
     istruzione = select(Subject).where(Subject.id == subject_id, Subject.user_id == current_user.id)
     materia = db.session.execute(istruzione).scalar_one_or_none()
 
@@ -82,8 +81,7 @@ def elimina_materia(subject_id):
         return redirect(url_for('dashboard.dashboard'))
     
     try:
-        # la materia si elimina a cascata al momento dell'eliminazione della materia
-    
+       
         db.session.delete(materia)
         db.session.commit()
         flash(f'Materia "{materia.name}" eliminata con successo.')
@@ -93,19 +91,47 @@ def elimina_materia(subject_id):
     
     return redirect(url_for('dashboard.dashboard'))
 
-
-#paggina dei report
-@dash_bp.route('/report/<int:subject_id>')
-def report(subject_id):
+#cerca le materia
+def get_subject_or_404(subject_id):
     istruzione = (
         select(Subject)
         .options(selectinload(Subject.datasets))
         .where(Subject.id == subject_id, Subject.user_id == current_user.id)
     )
     materia = db.session.execute(istruzione).scalar_one_or_none()
-    
+    return materia
+
+#report
+@dash_bp.route('/report/<int:subject_id>')
+def report(subject_id):
+    materia = get_subject_or_404(subject_id)
     if not materia:
-        flash("Materia non trovata o non autorizzato.", "danger")
+        flash("Materia non trovata.", "danger")
         return redirect(url_for('dashboard.dashboard'))
     
     return render_template('dashboard/report.html', subject=materia)
+
+#API
+@dash_bp.route('/api/data/<int:subject_id>')
+def get_report_data(subject_id):
+    materia = get_subject_or_404(subject_id)
+    if not materia:
+        return jsonify({'error': 'Non trovato'}), 404
+    
+    datasets_js = prepara_dataset_per_js(materia.datasets)
+    return jsonify(datasets_js)
+
+#report con solo le tabelle
+@dash_bp.route('/report/<int:subject_id>/tabelle')
+def report_tabelle(subject_id):
+    materia = get_subject_or_404(subject_id)
+
+    if not materia:
+        flash("Materia non trovata.", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+
+    datasets_ordinati = ordina_datasets(materia.datasets)
+
+    return render_template('dashboard/report_tabelle.html', 
+                           subject=materia, 
+                           datasets=datasets_ordinati)

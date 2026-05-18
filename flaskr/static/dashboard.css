@@ -52,3 +52,12 @@
     color: #6c757d; /* text-muted */
     font-size: 0.9rem;
 }
+
+.card { 
+    border-radius: 12px; 
+}
+
+canvas { 
+    width: 100% !important; 
+    max-height: 500px; 
+}

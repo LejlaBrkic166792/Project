@@ -1,11 +1,54 @@
 {% extends 'dashboard/base_dash.html' %}
-{% block body %}
-<div class="dash-header mb-4">
-    <h1>Ecco il report di {{ subject.name }}</h1>
-    <a href="" class="btn btn-success">
-        + Aggiungi Report
-    </a>
-</div>
-    
 
+{% block title %} Analisi - {{ subject.name }} {% endblock %}
+
+{% block body %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary">{{ subject.name }}</h1>
+            <p class="text-muted">Analisi storica delle medie pesate (scala 1-4)</p>
+        </div>
+        <div class="btn-group">
+            <a href="{{ url_for('dashboard.report_tabelle', subject_id=subject.id) }}" class="btn btn-outline-primary">Tabelle Dati</a>
+            <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Indietro</a>
+        </div>
+    </div>
+
+    <div class="card mb-5 shadow-sm border-0">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h6 class="m-0 fw-bold text-secondary">Filtro Periodo</h6>
+                <span id="range-label" class="badge bg-primary fs-6">Sincronizzazione...</span>
+            </div>
+            <div id="slider-range" class="mx-2"></div>
+        </div>
+    </div>
+
+    <div id="charts-container" class="row">
+        <div id="loading-spinner" class="text-center my-5">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 text-muted">Elaborazione medie in corso...</p>
+        </div>
+    </div>
+
+    <template id="chart-template">
+        <div class="col-12 mb-5">
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4">
+                    <h5 class="chart-title fw-bold mb-4 text-dark" style="font-size: 1.1rem;"></h5>
+                    <div style="height: 350px; position: relative;">
+                        <canvas class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <input type="hidden" id="api-url" value="{{ url_for('dashboard.get_report_data', subject_id=subject.id) }}">
+</div>
+{% endblock %}
+
+{% block scripts %}
+    <script src="{{ url_for('static', filename='js/report_charts.js') }}"></script>
 {% endblock %}

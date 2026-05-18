@@ -2,3 +2,7 @@
 /.venv
 /instance
 /flaskr/__pycache__/*.pyc
+crea_csv.py 
+/output_reports
+/output_reports/*.csv
+config.py
