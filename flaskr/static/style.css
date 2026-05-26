@@ -1,16 +1,36 @@
-/* Colore Pesca per lo sfondo del body */
-.bg-peach {
-    background-color: #FFDAB9 !important; /* PeachPuff */
+:root {
+    --auth-bg: #f0f4f8; 
+    --dash-blue: #0d6efd; 
+    --dash-blue-hover: #0b5ed7; 
+}
+
+body {
+    background-color: var(--auth-bg);
+}
+
+/* Sostituisce la vecchia classe .bg-peach */
+.bg-auth-theme {
+    background-color: var(--auth-bg) !important; 
+}
+
+.btn-custom {
+    background-color: var(--dash-blue); 
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease-in-out;
 }
 
 .btn-custom:hover {
-    background-color: #FF6347; /* Un corallo leggermente più scuro */
+    background-color: var(--dash-blue-hover); 
     color: white;
 }
 
 .form-control:focus {
-    border-color: #FF7F50;
-    box-shadow: 0 0 0 0.25rem rgba(255, 127, 80, 0.25);
+    /* Colori nativi di Bootstrap per l'alone azzurro di selezione */
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
 }
 
 .alert {
@@ -26,29 +46,10 @@
     width: 100%;
     max-width: 420px;
     text-align: center;
-    /* Animazione di entrata */
     animation: fadeIn 0.5s ease-in-out;
 }
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(-20px); }
     to { opacity: 1; transform: translateY(0); }
-}
-
-:root {
-    --peach-bg: #FFDAB9;
-    --corallo: #FF7F50;
-}
-
-body {
-    background-color: var(--peach-bg);
-}
-
-/* Personalizzazione bottoni per richiamare il tema pesca */
-.btn-custom {
-    background-color: #FF7F50; /* Corallo */
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    font-weight: 600;
 }

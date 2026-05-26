@@ -1,11 +1,11 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
-from .models import User  # Serve per il controllo dello username esistente
+from .models import User  
 from sqlalchemy import select
 
 class RegisterForm(FlaskForm):
-    # Definizione dei campi
+    
     username = StringField(
         label="Username",
         validators=[InputRequired(), Length(min=4, max=20)],
@@ -20,7 +20,6 @@ class RegisterForm(FlaskForm):
     
     submit = SubmitField("Registrati")
 
-    # In form.py
     def validate_username(self, username):
         from .db import db # Import locale
         stmt = select(User).where(User.username == username.data)

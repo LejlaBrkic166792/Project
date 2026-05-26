@@ -1,7 +1,6 @@
 from .db import db
 #con usermixin ottiene automaticamente i quattro metodi richiesti dalla documentazione di Flask-Login
 from flask_login import UserMixin
-from datetime import datetime
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,7 +22,6 @@ class Dataset(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     filename = db.Column(db.String(100), nullable=False)
     data_json = db.Column(db.JSON, nullable=False)
-
     
     subject_id = db.Column(db.Integer, db.ForeignKey('subject.id'), nullable=False)
     subject = db.relationship('Subject', back_populates='datasets')

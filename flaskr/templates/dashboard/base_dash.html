@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='dashboard.css') }}">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
@@ -11,8 +13,8 @@
 </head>
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-primary shadow-sm">
-        <div class="container-fluid dash-nav"> <!-- Classe CSS personalizzata -->
-            <a class="navbar-brand font-bold" href="{{ url_for('dashboard.dashboard') }}">
+        <div class="container-fluid d-flex justify-content-between align-items-center px-3"> 
+            <a class="navbar-brand fw-bold" href="{{ url_for('dashboard.dashboard') }}">
                 Dashboard di {{ current_user.username }}
             </a>
             <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">Esci</a>
@@ -34,13 +36,11 @@
         {% block body %}{% endblock %}
     </div>
 
-
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    {%block scripts%}
-    {% endblock%}
+    
+    {% block scripts %}{% endblock %}
 </body>
 </html>

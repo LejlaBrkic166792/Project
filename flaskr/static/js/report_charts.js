@@ -36,8 +36,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     const totale = v1 + v2 + v3 + v4;
                     const media = totale > 0 ? ((v1*1 + v2*2 + v3*3 + v4*4) / totale) : 0;
 
+                    // CORRETTO: ora usiamo d.year invece di d.anno
                     return {
-                        anno: d.anno !== 'N/D' ? d.anno : d.filename.match(/\d{4}[\/_-]\d{2,4}/)?.[0] || d.filename,
+                        anno: d.year !== 'N/D' ? d.year : d.filename.match(/\d{4}[\/_-]\d{2,4}/)?.[0] || d.filename,
                         media: media.toFixed(2),
                         testo: riga["Domanda"]
                     };
@@ -51,7 +52,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
     function initCharts() {
-        // Puliamo il contenitore (rimuove lo spinner)
         container.innerHTML = ''; 
 
         processedData.forEach((serie, index) => {
@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     datasets: [{
                         label: 'Media Punteggio',
                         data: serie.map(s => s.media),
-                        borderColor: '#0d6efd',
+                        borderColor: '#0d6efd', // Il blu Bootstrap della tua dashboard
                         backgroundColor: 'rgba(13, 110, 253, 0.05)',
                         borderWidth: 3,
                         tension: 0.3,
@@ -123,4 +123,4 @@ document.addEventListener('DOMContentLoaded', function() {
             chart.update('none'); 
         });
     }
-});
+}); 

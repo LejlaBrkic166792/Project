@@ -1,7 +1,4 @@
-'''
-unico compito è la configurazione (Application Factory):
-impostare il database, registrare i Blueprint e caricare le chiavi segrete.
-'''
+
 import os
 from dotenv import load_dotenv
 from flask import Flask, render_template
@@ -60,8 +57,5 @@ def create_app():
 
     def internal_server_error(e):
         return render_template('errors/500.html'), 500
-
-    app.register_error_handler(404, page_not_found)
-    app.register_error_handler(500, internal_server_error)
 
     return app

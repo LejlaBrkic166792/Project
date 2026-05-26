@@ -17,54 +17,56 @@ def allowed_file(filename):
 
 @dash_bp.before_request
 @login_required
-def controllo_accessi():
+def require_login():
     pass
 
 #mostra la lista delle materie dell'prof
 @dash_bp.route('/') 
 def dashboard():
-    lista = select(Subject).where(Subject.user_id == current_user.id)
-    materie = db.session.execute(lista).scalars().all()
-    return render_template('dashboard/lista_materie.html', subjects=materie)
+    stmt = select(Subject).where(Subject.user_id == current_user.id)
+    subjects = db.session.execute(stmt).scalars().all()
+    return render_template('dashboard/lista_materie.html', subjects=subjects)
 
 #aggiunge una nuova materia
 @dash_bp.route('/nuova_materia', methods=['GET', 'POST'])
-def nuova_materia():
+def new_subject():
     if request.method == 'POST':
-        nome_materia = request.form.get('subject_name')
+        subject_name = request.form.get('subject_name')
         files = request.files.getlist('files')
 
         if files and files[0].filename != '':
             try:
-                if not nome_materia:
-                    nome_materia = estrai_valore(files[0], 'Attività Didattica (AD)')
+                if not subject_name:
+                    subject_name = extract_metadata(files[0], 'Attività Didattica (AD)')
                    
-                    if not nome_materia:
-                        nome_materia = "Materia senza nome (estrazione fallita)"
+                    if not subject_name:
+                        subject_name = "Materia senza nome (estrazione fallita)"
                 
-                nuova_materia_obj = Subject(name=nome_materia, user_id=current_user.id)
-                db.session.add(nuova_materia_obj)
+                new_subject_obj = Subject(name=subject_name, user_id=current_user.id)
+                db.session.add(new_subject_obj)
+
+                # flush() assegna un ID a new_subject_obj senza chiudere la transazione
                 db.session.flush()
                 
 
                 for file in files:
                     if file and file.filename != '' and allowed_file(file.filename):
                         
-                        data_list = stat_csv(file)
+                        data_list = csv_to_json(file)
 
                         new_dataset = Dataset(
                             filename=secure_filename(file.filename),
                             data_json=data_list,
-                            subject_id=nuova_materia_obj.id
+                            subject_id=new_subject_obj.id
                         )
                         db.session.add(new_dataset)
                 db.session.commit()
                 
-                flash(f'Materia "{nome_materia}" creata con successo!', 'success')
+                flash(f'Materia "{subject_name}" creata con successo!', 'success')
                 return redirect(url_for('dashboard.dashboard'))
-            except Exception as e:
+            except Exception:
                 db.session.rollback()
-                flash(f'Errore: {e}')
+                flash('Errore durante la creazione della materia. Riprova.')
         else:
             flash('Dati mancanti o file non valido.')
 
@@ -72,66 +74,66 @@ def nuova_materia():
 
 #elimina la materia
 @dash_bp.route('/elimina_materia/<int:subject_id>', methods=['POST'])
-def elimina_materia(subject_id):
-    istruzione = select(Subject).where(Subject.id == subject_id, Subject.user_id == current_user.id)
-    materia = db.session.execute(istruzione).scalar_one_or_none()
+def delete_subject(subject_id):
+    stmt = select(Subject).where(Subject.id == subject_id, Subject.user_id == current_user.id)
+    subject = db.session.execute(stmt).scalar_one_or_none()
 
-    if not materia:
+    if not subject:
         flash("Operazione non consentita.", "danger")
         return redirect(url_for('dashboard.dashboard'))
     
     try:
        
-        db.session.delete(materia)
+        db.session.delete(subject)
         db.session.commit()
-        flash(f'Materia "{materia.name}" eliminata con successo.')
-    except Exception as e:
+        flash(f'Materia "{subject.name}" eliminata con successo.')
+    except Exception:
         db.session.rollback()
-        flash(f'Errore durante l\'eliminazione: {e}')
+        flash("Errore durante l'eliminazione della materia.")
     
     return redirect(url_for('dashboard.dashboard'))
 
 #cerca le materia
 def get_subject_or_404(subject_id):
-    istruzione = (
+    stmt = (
         select(Subject)
         .options(selectinload(Subject.datasets))
         .where(Subject.id == subject_id, Subject.user_id == current_user.id)
     )
-    materia = db.session.execute(istruzione).scalar_one_or_none()
-    return materia
+    return db.session.execute(stmt).scalar_one_or_none()
 
 #report
 @dash_bp.route('/report/<int:subject_id>')
 def report(subject_id):
-    materia = get_subject_or_404(subject_id)
-    if not materia:
+    subject = get_subject_or_404(subject_id)
+    if not subject:
         flash("Materia non trovata.", "danger")
         return redirect(url_for('dashboard.dashboard'))
     
-    return render_template('dashboard/report.html', subject=materia)
+    return render_template('dashboard/report.html', subject=subject)
+
+#report con solo le tabelle
+@dash_bp.route('/report/<int:subject_id>/tabelle')
+def report_tables(subject_id):
+    subject = get_subject_or_404(subject_id)
+
+    if not subject:
+        flash("Materia non trovata.", "danger")
+        return redirect(url_for('dashboard.dashboard'))
+
+    datasets_ordinati = sort_datasets(subject.datasets)
+
+    return render_template('dashboard/report_tabelle.html', 
+                           subject=subject, 
+                           datasets=datasets_ordinati)
+
 
 #API
 @dash_bp.route('/api/data/<int:subject_id>')
 def get_report_data(subject_id):
-    materia = get_subject_or_404(subject_id)
-    if not materia:
+    subject = get_subject_or_404(subject_id)
+    if not subject:
         return jsonify({'error': 'Non trovato'}), 404
     
-    datasets_js = prepara_dataset_per_js(materia.datasets)
+    datasets_js = prepare_datasets_for_js(subject.datasets)
     return jsonify(datasets_js)
-
-#report con solo le tabelle
-@dash_bp.route('/report/<int:subject_id>/tabelle')
-def report_tabelle(subject_id):
-    materia = get_subject_or_404(subject_id)
-
-    if not materia:
-        flash("Materia non trovata.", "danger")
-        return redirect(url_for('dashboard.dashboard'))
-
-    datasets_ordinati = ordina_datasets(materia.datasets)
-
-    return render_template('dashboard/report_tabelle.html', 
-                           subject=materia, 
-                           datasets=datasets_ordinati)

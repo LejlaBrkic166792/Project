@@ -3,23 +3,21 @@ from flask_login import login_user, logout_user, login_required, current_user
 from .models import User
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-#da vedere se usare werkzeug o bcrypt
 from .db import db, bcrypt
-# Importiamo le classi dei form (che definirai in un file forms.py o in cima a questo file)
 from .form import RegisterForm, LoginForm 
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/auth')
 
 #Impedisce agli utenti loggati di accedere a login/register
 @auth_bp.before_request
-def gestione_pre_richiesta():
+def redirect_if_authenticated():
     excluded_endpoints = ['auth.login', 'auth.register']
     if current_user.is_authenticated and request.endpoint in excluded_endpoints:
         return redirect(url_for('dashboard.dashboard'))
 
 #Aggiunge header di sicurezza per le autenticazione
 @auth_bp.after_request
-def gestione_post_richiesta(response):
+def add_headers(response):
     response.headers["X-Frame-Options"] = "DENY"
     return response
 
