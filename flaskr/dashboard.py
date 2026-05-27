@@ -25,10 +25,10 @@ def require_login():
 def dashboard():
     stmt = select(Subject).where(Subject.user_id == current_user.id)
     subjects = db.session.execute(stmt).scalars().all()
-    return render_template('dashboard/lista_materie.html', subjects=subjects)
+    return render_template('dashboard/subject_list.html', subjects=subjects)
 
 #aggiunge una nuova materia
-@dash_bp.route('/nuova_materia', methods=['GET', 'POST'])
+@dash_bp.route('/new_subject', methods=['GET', 'POST'])
 def new_subject():
     if request.method == 'POST':
         subject_name = request.form.get('subject_name')
@@ -70,10 +70,10 @@ def new_subject():
         else:
             flash('Dati mancanti o file non valido.')
 
-    return render_template('dashboard/nuova_materia.html')
+    return render_template('dashboard/new_subject.html')
 
 #elimina la materia
-@dash_bp.route('/elimina_materia/<int:subject_id>', methods=['POST'])
+@dash_bp.route('/delete_subject/<int:subject_id>', methods=['POST'])
 def delete_subject(subject_id):
     stmt = select(Subject).where(Subject.id == subject_id, Subject.user_id == current_user.id)
     subject = db.session.execute(stmt).scalar_one_or_none()
@@ -81,9 +81,7 @@ def delete_subject(subject_id):
     if not subject:
         flash("Operazione non consentita.", "danger")
         return redirect(url_for('dashboard.dashboard'))
-    
     try:
-       
         db.session.delete(subject)
         db.session.commit()
         flash(f'Materia "{subject.name}" eliminata con successo.')
@@ -113,7 +111,7 @@ def report(subject_id):
     return render_template('dashboard/report.html', subject=subject)
 
 #report con solo le tabelle
-@dash_bp.route('/report/<int:subject_id>/tabelle')
+@dash_bp.route('/report/<int:subject_id>/tables')
 def report_tables(subject_id):
     subject = get_subject_or_404(subject_id)
 
@@ -123,7 +121,7 @@ def report_tables(subject_id):
 
     datasets_ordinati = sort_datasets(subject.datasets)
 
-    return render_template('dashboard/report_tabelle.html', 
+    return render_template('dashboard/report_tables.html', 
                            subject=subject, 
                            datasets=datasets_ordinati)
 
@@ -135,5 +133,11 @@ def get_report_data(subject_id):
     if not subject:
         return jsonify({'error': 'Non trovato'}), 404
     
-    datasets_js = prepare_datasets_for_js(subject.datasets)
-    return jsonify(datasets_js)
+    if not subject.datasets:
+        return jsonify([])
+
+    try:
+        datasets_js = prepare_datasets_for_js(subject.datasets)
+        return jsonify(datasets_js)
+    except Exception:
+        return jsonify({'error': 'Fallito il processo dei report'}), 500
