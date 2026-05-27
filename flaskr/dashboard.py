@@ -34,49 +34,40 @@ def new_subject():
         subject_name = request.form.get('subject_name')
         files = request.files.getlist('files')
 
-        if files and files[0].filename != '':
-            try:
-                reference_ad = extract_metadata(files[0], 'Attività Didattica (AD)')
-               
-                if not subject_name:
-                    subject_name = reference_ad if reference_ad else "Materia senza nome"
-                
-                new_subject_obj = Subject(name=subject_name, user_id=current_user.id)
-                db.session.add(new_subject_obj)
-                db.session.flush()
+        is_valid, error_msg, reference_ad = validate_files_consistency(files)
 
-                for file in files:
-                    if file and file.filename != '' and allowed_file(file.filename):
-                        
-                        #BLOCCO DI SICUREZZA: Controllo Coerenza Materia
-                        current_file_ad = extract_metadata(file, 'Attività Didattica (AD)')
-                        
-                        if reference_ad and current_file_ad and current_file_ad != reference_ad:
-                            db.session.rollback()
-                            flash(f'Errore: il file "{file.filename}" appartiene a "{current_file_ad}", non "{reference_ad}"')
-                            return redirect(url_for('dashboard.new_subject'))
-                        # -------------------------------------------------------
+        if not is_valid:
+            flash(error_msg)
+            return redirect(url_for('dashboard.new_subject'))
 
-                        data_list = csv_to_json(file)
-                        new_dataset = Dataset(
-                            filename=secure_filename(file.filename),
-                            data_json=data_list,
-                            subject_id=new_subject_obj.id
-                        )
-                        db.session.add(new_dataset)
-                
-                
-                db.session.commit()
-                flash(f'Materia "{subject_name}" creato con successo!')
-                return redirect(url_for('dashboard.dashboard'))
+        try:
+            if not subject_name:
+                subject_name = reference_ad if reference_ad else "Materia senza nome"
             
-            except Exception as e:
-                db.session.rollback()
-                flash('Errore nel creare la materia')
-        else:
-            flash('File mancanti o erratti')
+            new_subject_obj = Subject(name=subject_name, user_id=current_user.id)
+            db.session.add(new_subject_obj)
+            db.session.flush()
+
+            for file in files:
+                if file and file.filename != '' and allowed_file(file.filename):
+                    data_list = csv_to_json(file)
+                    new_dataset = Dataset(
+                        filename=secure_filename(file.filename),
+                        data_json=data_list,
+                        subject_id=new_subject_obj.id
+                    )
+                    db.session.add(new_dataset)
+            
+            db.session.commit()
+            flash(f'Materia "{subject_name}" creata con successo!', 'success')
+            return redirect(url_for('dashboard.dashboard'))
+        
+        except Exception as e:
+            db.session.rollback()
+            flash('Errore nel creare la materia.', 'danger')
 
     return render_template('dashboard/new_subject.html')
+
 
 #elimina la materia
 @dash_bp.route('/delete_subject/<int:subject_id>', methods=['POST'])

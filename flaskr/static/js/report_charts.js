@@ -14,9 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Interrompi l'esecuzione se mancano elementi chiave nel DOM
     if (!apiUrlElement || !container || !template) return;
 
-    // ==========================================
-    // 1. UTILITIES E CALCOLI MATEMATICI
-    // ==========================================
 
     function cleanValue(val) {
         // Pulisce le stringhe (rimuove % e converte virgole in punti)
@@ -44,9 +41,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return match ? match[0] : dataset.filename;
     }
 
-    // ==========================================
-    // 2. ELABORAZIONE DATI (BUSINESS LOGIC)
-    // ==========================================
 
     function processReportData(data) {
         const questionsCount = data[0].data_json.length;
@@ -66,10 +60,6 @@ document.addEventListener('DOMContentLoaded', function() {
             processedData.push(historicalSeries);
         }
     }
-
-    // ==========================================
-    // 3. GESTIONE INTERFACCIA E GRAFICI (UI)
-    // ==========================================
 
     function initCharts() {
         container.innerHTML = ''; // Svuota lo spinner
@@ -141,7 +131,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            // --- Logica Esportazione Singolo Grafico in PNG ---
+            //Logica Esportazione Singolo Grafico in PNG ---
             if (downloadPngBtn) {
                 downloadPngBtn.addEventListener('click', function() {
                     const imageURL = newChart.toBase64Image();
@@ -185,9 +175,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ==========================================
-    // 4. ESPORTAZIONE GLOBALE (PDF)
-    // ==========================================
 
     if (downloadPdfBtn) {
         downloadPdfBtn.addEventListener('click', function() {
