@@ -6,3 +6,5 @@ crea_csv.py
 /output_reports
 /output_reports/*.csv
 config.py
+/output_reports_simulati
+

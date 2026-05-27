@@ -36,39 +36,45 @@ def new_subject():
 
         if files and files[0].filename != '':
             try:
+                reference_ad = extract_metadata(files[0], 'Attività Didattica (AD)')
+               
                 if not subject_name:
-                    subject_name = extract_metadata(files[0], 'Attività Didattica (AD)')
-                   
-                    if not subject_name:
-                        subject_name = "Materia senza nome (estrazione fallita)"
+                    subject_name = reference_ad if reference_ad else "Materia senza nome"
                 
                 new_subject_obj = Subject(name=subject_name, user_id=current_user.id)
                 db.session.add(new_subject_obj)
-
-                # flush() assegna un ID a new_subject_obj senza chiudere la transazione
                 db.session.flush()
-                
 
                 for file in files:
                     if file and file.filename != '' and allowed_file(file.filename):
                         
-                        data_list = csv_to_json(file)
+                        #BLOCCO DI SICUREZZA: Controllo Coerenza Materia
+                        current_file_ad = extract_metadata(file, 'Attività Didattica (AD)')
+                        
+                        if reference_ad and current_file_ad and current_file_ad != reference_ad:
+                            db.session.rollback()
+                            flash(f'Errore: il file "{file.filename}" appartiene a "{current_file_ad}", non "{reference_ad}"')
+                            return redirect(url_for('dashboard.new_subject'))
+                        # -------------------------------------------------------
 
+                        data_list = csv_to_json(file)
                         new_dataset = Dataset(
                             filename=secure_filename(file.filename),
                             data_json=data_list,
                             subject_id=new_subject_obj.id
                         )
                         db.session.add(new_dataset)
-                db.session.commit()
                 
-                flash(f'Materia "{subject_name}" creata con successo!', 'success')
+                
+                db.session.commit()
+                flash(f'Materia "{subject_name}" creato con successo!')
                 return redirect(url_for('dashboard.dashboard'))
-            except Exception:
+            
+            except Exception as e:
                 db.session.rollback()
-                flash('Errore durante la creazione della materia. Riprova.')
+                flash('Errore nel creare la materia')
         else:
-            flash('Dati mancanti o file non valido.')
+            flash('File mancanti o erratti')
 
     return render_template('dashboard/new_subject.html')
 
