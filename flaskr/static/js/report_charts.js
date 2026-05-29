@@ -61,12 +61,28 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // permette di mettere a capo le domande nel grafico
+    function wrapTextByWords(text, maxWordsPerLine = 8) {
+    if (!text) return '';
+        const words = text.split(' ');
+        let lines = [];
+        
+        for (let i = 0; i < words.length; i += maxWordsPerLine) {
+            // Prende un blocco di parole (da 'i' a 'i + maxWordsPerLine') e le unisce con uno spazio
+            lines.push(words.slice(i, i + maxWordsPerLine).join(' '));
+        }
+        
+        return lines;
+    }
+
     function initCharts() {
         container.innerHTML = ''; // Svuota lo spinner
 
         processedData.forEach((series, index) => {
             const clone = template.content.cloneNode(true);
-            clone.querySelector('.chart-title').textContent = series[0].label;
+            
+            // NOTA: La riga che inseriva il testo nella classe .chart-title è stata rimossa 
+            // per mantenere la domanda ESCLUSIVAMENTE dentro il grafico.
             
             const canvas = clone.querySelector('.chart-canvas');
             canvas.id = `chart-${index}`;
@@ -88,14 +104,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 data: {
                     labels: series.map(s => s.year),
                     datasets: [{
-                        label: 'Media Punteggio', // Traduzione per l'utente
+                        label: 'Media Punteggio', 
                         data: series.map(s => s.average),
                         borderColor: '#0d6efd',
-                        backgroundColor: gradient, // Uso del gradiente
+                        backgroundColor: gradient, 
                         borderWidth: 3,
-                        tension: 0.3, // Curvatura morbida
+                        tension: 0.3, 
                         fill: true,
-                        pointBackgroundColor: '#ffffff', // Pallini bianchi
+                        pointBackgroundColor: '#ffffff', 
                         pointBorderColor: '#0d6efd',
                         pointBorderWidth: 2,
                         pointRadius: 5,
@@ -106,8 +122,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: { 
+                        
+                        title: {
+                            display: true,
+                            text: wrapTextByWords(series[0].label, 20), 
+                            font: {
+                                size: 14,
+                                family: 'Inter, sans-serif',
+                                weight: 'bold'
+                            },
+                            color: '#212529',
+                            padding: {
+                                top: 10,
+                                bottom: 15
+                            }
+                        },
+                        
                         legend: { display: false },
-                        tooltip: { // Tooltip eleganti e moderni
+                        tooltip: { 
                             backgroundColor: '#212529',
                             padding: 12,
                             cornerRadius: 8,
@@ -118,25 +150,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     scales: {
                         x: { 
-                            grid: { display: false, drawBorder: false } // Rimuove righe verticali
+                            grid: { display: false, drawBorder: false } 
                         },
                         y: { 
                             min: 1, max: 4, 
                             ticks: { stepSize: 1, padding: 10 },
                             border: { display: false },
-                            grid: { color: '#e9ecef', tickLength: 0 }, // Griglia Y leggerissima
+                            grid: { color: '#e9ecef', tickLength: 0 }, 
                             title: { display: true, text: 'Punteggio (1-4)' }
                         }
                     }
                 }
             });
 
-            //Logica Esportazione Singolo Grafico in PNG ---
+            // Logica Esportazione Singolo Grafico in PNG ---
             if (downloadPngBtn) {
                 downloadPngBtn.addEventListener('click', function() {
                     const imageURL = newChart.toBase64Image();
                     const link = document.createElement('a');
-                    // Genera un nome file pulito basato sulla domanda
                     link.download = `${series[0].label.substring(0, 30).replace(/[^a-z0-9]/gi, '_').toLowerCase()}_chart.png`;
                     link.href = imageURL;
                     link.click();
@@ -182,11 +213,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const rangeText = rangeLabel ? rangeLabel.textContent : "report";
 
             const options = {
-                margin:       15,
+                margin:       15, 
                 filename:     `Report_Analytics_${rangeText.replace(/\s+/g, '_')}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true }, // scale 2 previene la sgranatura nel pdf
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                html2canvas:  { scale: 2, useCORS: true }, 
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
             };
 
             // Nasconde temporaneamente i bottoni PNG per non stamparli nel PDF
@@ -200,10 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ==========================================
-    // 5. BOOTSTRAP DELL'APPLICAZIONE (FETCH)
-    // ==========================================
-
+   
     fetch(apiUrlElement.value)
         .then(response => {
             if (!response.ok) throw new Error("Errore di rete API");
