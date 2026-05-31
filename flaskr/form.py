@@ -21,7 +21,7 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Registrati")
 
     def validate_username(self, username):
-        from .db import db # Import locale
+        from .db import db 
         stmt = select(User).where(User.username == username.data)
         existing_user = db.session.execute(stmt).scalar_one_or_none()
         if existing_user:

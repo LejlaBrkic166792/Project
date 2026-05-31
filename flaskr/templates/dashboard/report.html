@@ -13,6 +13,11 @@
             <button id="download-pdf-btn" class="btn btn-danger">
                 <i class="bi bi-file-pdf"></i> Esporta in PDF
             </button>
+            
+            <a href="{{ url_for('dashboard.upload_reports', subject_id=subject.id) }}" class="btn btn-success">
+                <i class="bi bi-plus-circle"></i> Aggiungi CSV
+            </a>
+
             <a href="{{ url_for('dashboard.report_tables', subject_id=subject.id) }}" class="btn btn-outline-primary">Tabelle Dati</a>
             <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-secondary">Indietro</a>
         </div>
@@ -58,6 +63,13 @@
 {% endblock %}
 
 {% block scripts %}
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='js/report_charts.js') }}"></script>
+
+    <script type="module" src="{{ url_for('static', filename='js/report_charts.js') }}"></script>
 {% endblock %}

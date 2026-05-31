@@ -1,5 +1,4 @@
 from .db import db
-#con usermixin ottiene automaticamente i quattro metodi richiesti dalla documentazione di Flask-Login
 from flask_login import UserMixin
 
 class User(UserMixin, db.Model):

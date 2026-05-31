@@ -4,10 +4,9 @@ from dotenv import load_dotenv
 from flask import Flask, render_template
 from .db import db, login_manager, bcrypt
 from flask_talisman import Talisman
-from config import DevelopmentConfig # Importa le tue classi
+from config import DevelopmentConfig 
 from flask_wtf.csrf import CSRFProtect
 
-#valutare in futuro se e come usare i caching
 
 #protegge richieste anche se non arrivano direttamente dal form
 csrf = CSRFProtect()
@@ -22,40 +21,34 @@ def create_app():
     app.config.from_object(DevelopmentConfig)
 
 
-    # Configurazione rapida: Talisman attivo solo in produzione
-    # Se app.debug è True, Talisman viene configurato per non rompere JS/CSS
-    Talisman(app, 
-             content_security_policy=None if app.debug else {'default-src': "'self'"},
-             force_https=not app.debug)
+    # Talisman da usare solo in produzione
+    #Talisman(app, 
+    #         content_security_policy=None if app.debug else {'default-src': "'self'"},
+    #         force_https=not app.debug)
 
-    #unisce l'istandza db all'app (a ogni richiesta sa come gestire la conessione al db)
+
     db.init_app(app)
-    #dice a flask come r/w i cookie di sessione (controlla se ce un id utente nel cooki e se ce lo carica dal db)
     login_manager.init_app(app)
     bcrypt.init_app(app)
     csrf.init_app(app)
 
-    # Se un utente prova ad accedere a una pagina protetta senza login, va automaticamente reindirizzato alla pagina di accesso.
     login_manager.login_view = 'auth.login' 
 
-    #Le viste vengono prima registrati nel Blueprint.
     from .auth import auth_bp
-    app.register_blueprint(auth_bp, url_prefix='/auth')#Il Blueprint viene "consegnato" all'applicazione solo quando questa è disponibile nella funzione factory
+    app.register_blueprint(auth_bp, url_prefix='/auth')
 
- 
     from .dashboard import dash_bp
     app.register_blueprint(dash_bp)
 
-    # Creazione tabelle
-    with app.app_context(): #
+    with app.app_context():
         from . import models  
-        db.create_all() #
-        
-    #GESTIONE ERORI provissorio 
-    def page_not_found(e):
-            return render_template('errors/404.html'), 404
+        db.create_all()
 
-    def internal_server_error(e):
-        return render_template('errors/500.html'), 500
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        print(f"Errore intercettato: {e}")
+        return render_template('errors/404.html'), 404
+    
 
     return app
