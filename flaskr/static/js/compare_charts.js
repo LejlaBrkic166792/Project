@@ -1,6 +1,3 @@
-// ==========================================
-// FILE: static/js/compare_charts.js
-// ==========================================
 
 import { groupDataByYearAndQuestion, extractQuestions, getAverage, extractYear, wrapTextByWords, createLineChart, setupPngDownload, setupPdfDownload } from '/static/js/utils.js';
 
@@ -76,23 +73,28 @@ document.addEventListener("DOMContentLoaded", function() {
 
             config.forEach(cfg => {
                 const hasData = sortedYears.some(year => getAverage(cfg.data, year, domanda, cfg.tipo) !== null);
+                
                 if (hasData) {
                     chartDatasets.push({
                         label: `${cfg.name} (${cfg.tipo})`,
-                        data: sortedYears.map(year => getAverage(cfg.data, year, domanda, cfg.tipo)),
+
+                        data: sortedYears.map(year => {
+                            let stats = getAverage(cfg.data, year, domanda, cfg.tipo);
+                            return stats ? { ...stats, x: year } : null;
+                        }),
+
                         borderColor: cfg.color, borderDash: cfg.dash, backgroundColor: 'transparent',
                         borderWidth: 3, tension: 0.3, spanGaps: true,
                         pointBackgroundColor: '#ffffff', pointBorderColor: cfg.color, pointBorderWidth: 2, pointRadius: 5
                     });
                 }
             });
-
+            
             if (chartDatasets.length === 0) return;
 
             const template = document.getElementById("compare-chart-template");
             const clone = template.content.cloneNode(true);
             
-            // Lasciamo vuoto l'h5 HTML per non avere il doppio titolo
             clone.querySelector(".chart-title").textContent = ''; 
             
             const canvas = clone.querySelector(".chart-canvas");

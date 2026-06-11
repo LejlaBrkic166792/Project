@@ -1,6 +1,3 @@
-// ==========================================
-// FILE: static/js/report_charts.js
-// ==========================================
 
 import { groupDataByYearAndQuestion, extractQuestions, getAverage, extractYear, wrapTextByWords, createLineChart, setupPngDownload, setupPdfDownload } from '/static/js/utils.js';
 
@@ -46,14 +43,20 @@ document.addEventListener('DOMContentLoaded', function() {
         container.innerHTML = '';
 
         questions.forEach((domanda, index) => {
-            const freqData = globalYears.map(year => getAverage(groupedData, year, domanda, 'Frequentanti'));
-            const nonFreqData = globalYears.map(year => getAverage(groupedData, year, domanda, 'Non Frequentanti'));
+            
+            const freqData = globalYears.map(year => {
+                let stats = getAverage(groupedData, year, domanda, 'Frequentanti');
+                return stats ? { ...stats, x: year } : null;
+            });
+            
+            const nonFreqData = globalYears.map(year => {
+                let stats = getAverage(groupedData, year, domanda, 'Non Frequentanti');
+                return stats ? { ...stats, x: year } : null;
+            });
 
             processedSeries.push({ years: globalYears, freqData: freqData, nonFreqData: nonFreqData });
 
             const clone = template.content.cloneNode(true);
-            
-            // Lasciamo vuoto l'h5 HTML per non avere il doppio titolo sulla pagina
             clone.querySelector('.chart-title').textContent = ''; 
             
             const canvas = clone.querySelector('.chart-canvas');

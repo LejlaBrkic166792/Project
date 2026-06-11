@@ -1,7 +1,3 @@
-// ==========================================
-// FILE: static/js/utils.js
-// Logica, Matematica, Grafica e Download
-// ==========================================
 
 export function cleanValue(val) {
     if (typeof val === 'string') {
@@ -17,9 +13,20 @@ export function calculateWeightedAverage(row) {
     const v2 = cleanValue(row["Più No che Sì"]);
     const v3 = cleanValue(row["Più Sì che No"]);
     const v4 = cleanValue(row["Decisamente Sì"]);
+    const nonSo = cleanValue(row['di cui "non so/non pertinente"']) || cleanValue(row["Non so/Non pertinente"]) || cleanValue(row["Non so"]) || 0;
     
-    const total = v1 + v2 + v3 + v4;
-    return total > 0 ? ((v1*1 + v2*2 + v3*3 + v4*4) / total) : null;
+    const total = v1 + v2 + v3 + v4 + nonSo;
+    
+    if (total === 0) return null;
+
+    const pesoNonSo = 2.5; 
+    const punteggioTotale = (v1 * 1) + (v2 * 2) + (v3 * 3) + (v4 * 4) + (nonSo * pesoNonSo);
+    
+    return {
+        media: parseFloat((punteggioTotale / total).toFixed(2)),
+        v1: v1, v2: v2, v3: v3, v4: v4, nonSo: nonSo, total: total
+    };
+    
 }
 
 export function extractYear(dataset) {
@@ -41,7 +48,7 @@ export function groupDataByYearAndQuestion(datasets) {
             
             if (media !== null) {
                 if (!grouped[year][dom]) grouped[year][dom] = {};
-                grouped[year][dom][tipo] = parseFloat(media.toFixed(2));
+                grouped[year][dom][tipo] = media;
             }
         });
     });
@@ -75,8 +82,6 @@ export function wrapTextByWords(text, maxWordsPerLine = 8) {
     return lines;
 }
 
-// --- NUOVE UTILITY GRAFICHE E DI DOWNLOAD ---
-
 // Crea il grafico standard (Line Chart)
 export function createLineChart(ctx, labels, datasets, chartTitle = null) {
     return new Chart(ctx, {
@@ -85,8 +90,10 @@ export function createLineChart(ctx, labels, datasets, chartTitle = null) {
         options: {
             responsive: true, 
             maintainAspectRatio: false,
+            parsing: {
+                yAxisKey: 'media' 
+            },
             plugins: { 
-                // ECCO IL TITOLO INTEGRATO NEL CANVAS:
                 title: {
                     display: chartTitle !== null,
                     text: chartTitle,
@@ -95,10 +102,43 @@ export function createLineChart(ctx, labels, datasets, chartTitle = null) {
                     padding: { top: 5, bottom: 20 }
                 },
                 legend: { display: true, position: 'bottom' },
-                tooltip: { backgroundColor: '#212529', padding: 12, cornerRadius: 8 }
+                tooltip: {        
+                    callbacks: {
+                        label: function(context) {
+                            const raw = context.raw;
+                            if (!raw) return `Nessun dato`;
+                            
+                            return [
+                                `Media: ${raw.media}`,
+                                `------------------------------`,
+                                `Decisamente Sì: ${raw.v4}`,
+                                `Più Sì che No: ${raw.v3}`,
+                                `Più No che Sì: ${raw.v2}`,
+                                `Decisamente No: ${raw.v1}`,
+                                `Non so / Non pert.: ${raw.nonSo}`,
+                                `Totale Partecipanti: ${raw.total}`
+                            ];
+                        }
+                    }
+                }
             },
             scales: { 
-                y: { min: 1, max: 4, ticks: { stepSize: 1 }, title: { display: true, text: 'Punteggio (1-4)' } },
+                y: { 
+                    min: 1,
+                    max: 4, 
+                    ticks: { 
+                        stepSize: 0.5,
+                        callback: function(value) {
+                            const mapping = {
+                                1: 'Decisamente No (1)',
+                                2: 'Più No che Sì (2)',
+                                3: 'Più Sì che No (3)',
+                                4: 'Decisamente Sì (4)'
+                            };
+                            return mapping[value] || ' ';
+                        }
+                    }
+                },
                 x: { grid: { display: false } }
             }
         }
@@ -123,7 +163,6 @@ export function setupPdfDownload(buttonElement, containerId, filename) {
         const element = document.getElementById(containerId);
         const pngButtons = document.querySelectorAll('.download-png-btn');
         
-        // Nasconde i bottoni PNG per non stamparli nel PDF
         pngButtons.forEach(btn => btn.style.display = 'none');
 
         html2pdf().set({
@@ -133,7 +172,6 @@ export function setupPdfDownload(buttonElement, containerId, filename) {
             html2canvas: { scale: 2, useCORS: true }, 
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         }).from(element).save().then(() => {
-            // Ripristina i bottoni PNG al termine
             pngButtons.forEach(btn => btn.style.display = 'block');
         });
     });

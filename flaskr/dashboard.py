@@ -180,7 +180,7 @@ def get_report_data(subject_id):
 
 
 
-# 1. Pagina per selezionare e visualizzare il confronto
+# 1. Pagina per il confronto
 @dash_bp.route('/compare')
 def compare_subjects():
     stmt = select(Subject).where(Subject.user_id == current_user.id)
@@ -193,7 +193,7 @@ def compare_subjects():
     return render_template('dashboard/compare.html', subjects=subjects)
 
 
-# 2. API che restituisce i dati di DUE materie contemporaneamente
+# 2. API per il confronto
 @dash_bp.route('/api/compare/<int:subject1_id>/<int:subject2_id>')
 def get_compare_data(subject1_id, subject2_id):
     sub1 = get_subject_or_404(subject1_id)
